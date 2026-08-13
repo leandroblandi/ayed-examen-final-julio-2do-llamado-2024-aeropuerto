@@ -120,7 +120,7 @@ En Windows con MSVC el ejecutable se genera en `build/Debug/`.
 
 ## Pruebas
 
-`main.c` contiene funciones de verificación manual que se habilitan descomentando su llamada
+`src/main.c` contiene funciones de verificación manual que se habilitan descomentando su llamada
 dentro de `main`:
 
 - `crearLista_debeCrearseListVacia`

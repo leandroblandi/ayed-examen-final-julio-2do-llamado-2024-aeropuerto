@@ -1,9 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "pasajero.h"
-
 #include <string.h>
-
+#include "pasajero.h"
 
 struct Pasajero {
     char apellido[50];

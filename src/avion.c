@@ -5,7 +5,6 @@
 #include "avion.h"
 #include "pasajero.h"
 #include "lista.h"
-#include "funciones.h"
 
 struct Avion {
     char tipo[80];
