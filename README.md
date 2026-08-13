@@ -9,6 +9,7 @@
 ![Callbacks](https://img.shields.io/badge/Patr%C3%B3n-Punteros%20a%20Funci%C3%B3n-8A2BE2)
 ![Opaque Pointer](https://img.shields.io/badge/Patr%C3%B3n-Opaque%20Pointer-B8860B)
 ![Bubble Sort](https://img.shields.io/badge/Algoritmo-Bubble%20Sort-DC143C)
+![Distancia Euclidiana](https://img.shields.io/badge/math.h-sqrtf%20%2F%20pow-FF8C00)
 ![Memoria Dinámica](https://img.shields.io/badge/Memoria-malloc%20%2F%20free-555555)
 
 Sistema de gestión de un aeropuerto implementado en C, resolviendo el examen final de
@@ -38,63 +39,86 @@ Tareas a realizar:
    (-34.6037, -58.3816)*, *Asunción (-25.2637, -57.5759)*, *La Paz (-16.5000, -68.1500)*.
 8. Calcular la distancia recorrida por el avión 3 usando `math.h` y `sqrt`.
 
-## Estado de la resolución
-
-| Ítem | Descripción | Estado |
-| --- | --- | --- |
-| 1 | Crear aeropuerto | Implementado |
-| 2 | Agregar aviones | Implementado |
-| 3 | Agregar pasajeros | Implementado |
-| 4 | Mostrar aeropuerto completo | Implementado |
-| 5 | Validación de capacidad | Implementado |
-| 6 | Eliminar pasajeros de ventanilla | Implementado |
-| 7 | Lista de destinos del avión 3 | Pendiente |
-| 8 | Cálculo de distancia recorrida | Pendiente |
+Los ocho ítems están implementados y se ejecutan desde
+`crearAeropuertoYAgregarAviones_debeCrearseYMostrarseCorrectamente` en `src/main.c`.
 
 ## Estructura del proyecto
 
 ```
 .
-├── CMakeLists.txt      Configuración de compilación (C11)
-├── main.c              Punto de entrada y casos de prueba de la consigna
-├── nodo.h / nodo.c     TDA Nodo: dato void* + puntero al siguiente
-├── lista.h / lista.c   TDA Lista simplemente enlazada genérica
-├── aeropuerto.h / .c   TDA Aeropuerto, contiene una lista de aviones
-├── avion.h / avion.c   TDA Avión, contiene una lista de pasajeros
-├── pasajero.h / .c     TDA Pasajero
-└── docs/               Enunciado original del examen
+├── CMakeLists.txt          Configuración de compilación (C11)
+├── include/
+│   ├── nodo.h              TDA Nodo: dato void* + puntero al siguiente
+│   ├── lista.h             TDA Lista simplemente enlazada genérica
+│   ├── aeropuerto.h        TDA Aeropuerto, contiene una lista de aviones
+│   ├── avion.h             TDA Avión, contiene listas de pasajeros y destinos
+│   ├── pasajero.h          TDA Pasajero
+│   ├── ciudad.h            TDA Ciudad, destino con latitud y longitud
+│   └── funciones.h         Funciones matemáticas auxiliares
+├── src/
+│   ├── main.c              Punto de entrada y casos de prueba de la consigna
+│   ├── nodo.c
+│   ├── lista.c
+│   ├── aeropuerto.c
+│   ├── avion.c
+│   ├── pasajero.c
+│   ├── ciudad.c
+│   └── funciones.c
+└── docs/                   Enunciado original del examen
 ```
+
+Los encabezados viven en `include/`, agregado al proyecto con `include_directories(include)`,
+y las unidades de compilación se listan en la variable `SOURCES` del `CMakeLists.txt`.
 
 ## Diseño
 
 ### TDA con punteros opacos
 
 Cada módulo declara su `struct` únicamente en el `.c` y expone en el `.h` un typedef al
-puntero (`ListaPtr`, `NodoPtr`, `AeropuertoPtr`, `AvionPtr`, `PasajeroPtr`). El consumidor
-nunca accede a los campos de forma directa: solo a través de constructores, destructores,
-getters, setters y operaciones. Esto garantiza el encapsulamiento propio del paradigma TDA.
+puntero (`ListaPtr`, `NodoPtr`, `AeropuertoPtr`, `AvionPtr`, `PasajeroPtr`, `CiudadPtr`). El
+consumidor nunca accede a los campos de forma directa: solo a través de constructores,
+destructores, getters, setters y operaciones. Esto garantiza el encapsulamiento propio del
+paradigma TDA.
 
 ### Lista genérica de tipo void
 
 El nodo almacena el dato como `typedef void* DatoPtr`, por lo que la misma implementación de
-lista se reutiliza para enteros, aviones y pasajeros. Las operaciones que dependen del tipo
-concreto se resuelven mediante punteros a función que recibe la lista por parámetro:
+lista se reutiliza para enteros, aviones, pasajeros y ciudades. Las operaciones que dependen
+del tipo concreto se resuelven mediante punteros a función que recibe la lista por parámetro:
 
 - `mostrarLista(lista, void (*mostrar)(DatoPtr))` — impresión del dato concreto.
 - `ordenarMedianteBurbuja(lista, int (*comparar)(DatoPtr, DatoPtr))` — orden por Bubble Sort.
 - `eliminarPorCondicion(lista, int (*condicion)(DatoPtr))` — eliminación por criterio.
+- `realizarCalculoEntreNodos(lista, float (*calculo)(DatoPtr, DatoPtr))` — acumula el
+  resultado del cálculo aplicado a cada par de nodos consecutivos.
 
-De esta forma, `mostrarAvionFn`, `mostrarPasajeroFn` y `esPasajeroDeVentanilla` actúan como
-adaptadores entre la lista genérica y cada TDA concreto.
+De esta forma, `mostrarAvionFn`, `mostrarPasajeroFn`, `mostrarCiudadFn`,
+`esPasajeroDeVentanilla` y `calcularDistanciaEntreCiudadesFn` actúan como adaptadores entre la
+lista genérica y cada TDA concreto.
 
 ### Composición de TDAs
 
-El aeropuerto mantiene una `ListaPtr aviones` y cada avión una `ListaPtr pasajeros`, por lo
-que mostrar el aeropuerto recorre en cascada aviones y pasajeros. El avión conserva su
-capacidad original y la capacidad disponible: `agregarPasajero` rechaza el alta e informa el
-error por consola cuando la capacidad llega a cero (ítem 5), y
-`eliminarPasajerosDeVentanilla` delega en `eliminarPorCondicion` usando
+El aeropuerto mantiene una `ListaPtr aviones`, y cada avión una `ListaPtr pasajeros` y una
+`ListaPtr destinos`, por lo que mostrar el aeropuerto recorre en cascada aviones, pasajeros y
+destinos. El avión conserva su capacidad original y la capacidad disponible:
+`agregarPasajero` rechaza el alta e informa el error por consola cuando la capacidad llega a
+cero (ítem 5), y `eliminarPasajerosDeVentanilla` delega en `eliminarPorCondicion` usando
 `esPasajeroDeVentanilla` como criterio (ítem 6).
+
+### Cálculo de la distancia recorrida
+
+`agregarCiudadDestino` carga la ruta del avión en su lista de destinos (ítem 7) y
+`calcularDistanciaRecorrida` (ítem 8) delega en `realizarCalculoEntreNodos` con el callback
+`calcularDistanciaEntreCiudadesFn`, que suma los tramos entre ciudades consecutivas. El cálculo
+puntual vive en el módulo `funciones`, que usa `math.h` para resolver la distancia euclidiana
+entre dos puntos con `pow` y `sqrtf`:
+
+```
+d = sqrt((x2 - x1)^2 + (y2 - y1)^2)
+```
+
+Al operar directamente sobre latitud y longitud como coordenadas planas, el resultado se
+expresa en unidades de grados y no en kilómetros, tal como plantea la consigna.
 
 ## API de la lista
 
@@ -104,7 +128,7 @@ error por consola cuando la capacidad llega a cero (ítem 5), y
 | Inserción | `insertarPrimero`, `insertarUltimo`, `insertarEnPosicion` |
 | Eliminación | `eliminarPrimero`, `eliminarUltimo`, `eliminarEnPosicion`, `eliminar`, `eliminarPorCondicion` |
 | Consulta | `getPrimero`, `setPrimero`, `getUltimo`, `setUltimo`, `getLargo` |
-| Recorrido | `mostrarLista`, `ordenarMedianteBurbuja` |
+| Recorrido | `mostrarLista`, `ordenarMedianteBurbuja`, `realizarCalculoEntreNodos` |
 
 ## Compilación y ejecución
 
@@ -120,12 +144,12 @@ En Windows con MSVC el ejecutable se genera en `build/Debug/`.
 
 ## Pruebas
 
-`src/main.c` contiene funciones de verificación manual que se habilitan descomentando su llamada
-dentro de `main`:
+`src/main.c` contiene funciones de verificación manual que se habilitan descomentando su
+llamada dentro de `main`:
 
 - `crearLista_debeCrearseListVacia`
 - `crearListaEInsertarDatos_DebeMostrarseCorrectamente`
 - `crearPasajero_debeCrearseYMostrarseCorrectamente`
 - `crearAvion_debeCrearseYMostrarseCorrectamente`
-- `crearAeropuertoYAgregarAviones_debeCrearseYMostrarseCorrectamente` — recorre los ítems 1 a 6
+- `crearAeropuertoYAgregarAviones_debeCrearseYMostrarseCorrectamente` — recorre los ítems 1 a 8
   de la consigna y es la que se ejecuta por defecto.
