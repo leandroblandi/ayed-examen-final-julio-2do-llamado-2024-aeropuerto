@@ -406,3 +406,26 @@ void eliminarPorCondicion(ListaPtr lista, int(*condicion)(DatoPtr)) {
         nodoActual = nodoProximo;
     }
 }
+
+float realizarCalculoEntreNodos(ListaPtr lista, float(*calculo)(DatoPtr, DatoPtr)) {
+     if (!lista || !calculo) {
+         return -999.00f;
+     }
+
+    NodoPtr nodoActual = lista->primero;
+    float sumatoria = 0.0f;
+
+    while (nodoActual) {
+        NodoPtr nodoProximo = getSiguiente(nodoActual);
+
+        if (nodoProximo != NULL) {
+            DatoPtr d1 = getDato(nodoActual);
+            DatoPtr d2 = getDato(nodoProximo);
+            sumatoria = sumatoria + calculo(d1, d2);
+        }
+
+        nodoActual = nodoProximo;
+    }
+
+    return sumatoria;
+}

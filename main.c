@@ -68,7 +68,7 @@ void crearAvion_debeCrearseYMostrarseCorrectamente() {
 }
 
 void crearAeropuertoYAgregarAviones_debeCrearseYMostrarseCorrectamente() {
-    AeropuertoPtr aeropuerto = crearAeropuerto("Ministro Pistarini", "Riccheri 33", 11548061111L);
+    AeropuertoPtr aeropuerto = crearAeropuerto("Ministro Pistarini", "Riccheri 33", 1154806111);
 
     AvionPtr a1 = crearAvion("Boeing 737", 1111, 10);
     AvionPtr a2 = crearAvion("Airbus A320", 2222, 5);
@@ -110,6 +110,23 @@ void crearAeropuertoYAgregarAviones_debeCrearseYMostrarseCorrectamente() {
     eliminarPasajerosDeVentanilla(a3);
 
     mostrarAeropuerto(aeropuerto);
+
+    CiudadPtr c1 = crearCiudad("Buenos Aires", -34.6037f, -58.3816f);
+    CiudadPtr c2 = crearCiudad("Asuncion", -25.2637f, -57.5759f);
+    CiudadPtr c3 = crearCiudad("La Paz", -16.5000f, -68.1500f);
+
+    agregarCiudadDestino(a3, c1);
+    agregarCiudadDestino(a3, c2);
+    agregarCiudadDestino(a3, c3);
+
+    mostrarAvion(a3);
+
+    float distanciaEntreCiudades = calcularDistanciaRecorrida(a3);
+    printf("\nEl avion %s recorrio una distancia de %.2f unidades.",
+        getTipo(a3),
+        distanciaEntreCiudades
+    );
+
 }
 
 

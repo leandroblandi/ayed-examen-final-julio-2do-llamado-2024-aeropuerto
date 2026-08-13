@@ -11,4 +11,8 @@ add_executable(ayed_examen_final_julio_2do_llamado_2024 main.c
         pasajero.c
         avion.c
         aeropuerto.c
-        aeropuerto.h)
+        aeropuerto.h
+        ciudad.c
+        ciudad.h
+        funciones.c
+        funciones.h)

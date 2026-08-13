@@ -71,4 +71,6 @@ void eliminar(ListaPtr lista, NodoPtr nodo);
 /// dictada por la funcion callback condicion(DatoPtr)
 void eliminarPorCondicion(ListaPtr lista, int(*condicion)(DatoPtr));
 
+float realizarCalculoEntreNodos(ListaPtr lista, float(*calculo)(DatoPtr, DatoPtr));
+
 #endif // LISTA_H_INCLUDED

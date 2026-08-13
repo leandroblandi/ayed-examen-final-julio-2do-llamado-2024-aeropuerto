@@ -5,11 +5,13 @@
 #include "avion.h"
 #include "pasajero.h"
 #include "lista.h"
+#include "funciones.h"
 
 struct Avion {
     char tipo[80];
     int matricula, capacidad, capacidadOriginal;
     ListaPtr pasajeros;
+    ListaPtr destinos;
 };
 
 AvionPtr crearAvion(char tipo[], int matricula, int capacidad) {
@@ -24,6 +26,7 @@ AvionPtr crearAvion(char tipo[], int matricula, int capacidad) {
     a->capacidad = capacidad;
     a->capacidadOriginal = capacidad;
     a->pasajeros = crearLista();
+    a->destinos = crearLista();
 
     return a;
 }
@@ -48,6 +51,9 @@ void mostrarAvion(AvionPtr avion) {
 
     printf("\nPasajeros asignados al Avion:");
     mostrarLista(avion->pasajeros, &mostrarPasajeroFn);
+
+    printf("\nDestinos del Avion:");
+    mostrarLista(avion->destinos, &mostrarCiudadFn);
 }
 
 void mostrarAvionFn(void* avion) {
@@ -100,4 +106,20 @@ void eliminarPasajerosDeVentanilla(AvionPtr avion) {
 
     // elimino de la lista todos los pasajeros con ventanilla 'S'
     eliminarPorCondicion(avion->pasajeros, esPasajeroDeVentanilla);
+}
+
+void agregarCiudadDestino(AvionPtr avion, CiudadPtr ciudad) {
+    if (!avion || !avion->pasajeros || !ciudad) {
+        return;
+    }
+
+    insertarUltimo(avion->destinos, ciudad);
+}
+
+float calcularDistanciaRecorrida(AvionPtr avion) {
+    if (!avion || !avion->destinos) {
+        return -999.0f;
+    }
+
+    return realizarCalculoEntreNodos(avion->destinos, &calcularDistanciaEntreCiudadesFn);
 }
